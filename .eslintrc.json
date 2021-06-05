@@ -18,6 +18,7 @@
         "react"
     ],
     "rules": {
-        "no-use-bofore-define":0
+        "no-use-bofore-define":0,
+        "react/props-types": ["error", { "ignore": ["navigation"] }]
     }
 }
