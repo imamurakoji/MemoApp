@@ -19,6 +19,7 @@
     ],
     "rules": {
         "no-use-bofore-define":0,
-        "react/props-types": ["error", { "ignore": ["navigation"] }]
+        "react/props-types": ["error", { "ignore": ["navigation"] }],
+        "import/prefer-default-export": 0
     }
 }

@@ -1,21 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { shape, string } from 'prop-types';
 import { View, ScrollView, Text, StyleSheet } from 'react-native';
+import firebase from 'firebase';
 
 import CircleButton from '../components/CircleButton';
+import { dateToString } from '../utils/index.js';
 
 export default function MemoDetailScreen(props) {
-    const { navigation } = props;
+    const { navigation, route } = props;
+    const { id } = route.params;
+    console.log(id);
+    const [memo, setMemo ] = useState(null);
+
+    useEffect(() => {
+        const { currentUser } = firebase.auth();
+        let unsubscribe = () => {};
+        if(currentUser){
+            const db = firebase.firestore();
+            const ref = db.collection(`users/${currentUser.uid}/memos`).doc(id);
+            unsubscribe = ref.onSnapshot((doc) => {
+            console.log(doc.id, doc.data());
+            const data = doc.data();
+            setMemo({
+                id: doc.id,
+                bodyText: data.bodyText,
+                updatedAt: data.updatedAt.toDate(),
+            });
+        });
+        }
+        return unsubscribe;
+    });
     return(
         <View style={Styles.container}>
             <View style={Styles.memoHeader}>
-                <Text style={Styles.memoTitle}>買い物リスト</Text>
-                <Text style={Styles.memoDate}>2020年12月24日 10:00</Text>
+                <Text style={Styles.memoTitle} numberOfLines={1}>{memo && memo.bodyText}</Text>
+                <Text style={Styles.memoDate}>{memo && dateToString(memo.updatedAt)}</Text>
             </View>
             <ScrollView style={Styles.memoBody}>
                 <Text style={Styles.memoText}>
-                    買い物リスト
-                    テキストテキストテキストテキストテキストテキスト
-                    テキストテキストテキストテキストテキストテキストテキストテキストテキスト
+                    {memo && memo.bodyText}
                 </Text>
             </ScrollView>
             <CircleButton
@@ -26,6 +49,12 @@ export default function MemoDetailScreen(props) {
         </View>
     );
 }
+
+MemoDetailScreen.propTypes = {
+    route: shape({
+        params: shape({ id: string }),
+    }).isRequired,
+};
 
 const Styles = StyleSheet.create({
     container: {
